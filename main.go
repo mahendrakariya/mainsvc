@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -15,13 +16,6 @@ import (
 	"github.com/mahendrakariya/mainsvc/add"
 	"github.com/mahendrakariya/mainsvc/divide"
 	"google.golang.org/grpc"
-)
-
-const (
-	add_grpc_address      = "localhost:50051"
-	divide_grpc_address   = "localhost:50052"
-	multiply_http_address = "http://localhost:8001/multiply"
-	subtract_http_address = "http://localhost:4567/subtract"
 )
 
 func main() {
@@ -53,33 +47,33 @@ func http_server() {
 
 		o := &Output{}
 
-		sum, err := add_grpc(n.A, n.B)
-		if err != nil {
-			o.Sum = err.Error()
-		} else {
-			o.Sum = strconv.Itoa(int(sum))
-		}
+		// sum, err := add_grpc(n.A, n.B)
+		// if err != nil {
+		// 	o.Sum = err.Error()
+		// } else {
+		// 	o.Sum = strconv.Itoa(int(sum))
+		// }
 
-		diff, err := subtract_http(n.A, n.B)
-		if err != nil {
-			o.Diff = err.Error()
-		} else {
-			o.Diff = strconv.Itoa(int(diff))
-		}
-
+		//		diff, err := subtract_http(n.A, n.B)
+		//		if err != nil {
+		//			o.Diff = err.Error()
+		//		} else {
+		//			o.Diff = strconv.Itoa(int(diff))
+		//		}
+		//
 		product, err := multiply_http(n.A, n.B)
 		if err != nil {
 			o.Product = err.Error()
 		} else {
 			o.Product = strconv.Itoa(int(product))
 		}
-
-		quotient, err := divide_grpc(n.A, n.B)
-		if err != nil {
-			o.Quotient = err.Error()
-		} else {
-			o.Quotient = strconv.Itoa(int(quotient))
-		}
+		//
+		//		quotient, err := divide_grpc(n.A, n.B)
+		//		if err != nil {
+		//			o.Quotient = err.Error()
+		//		} else {
+		//			o.Quotient = strconv.Itoa(int(quotient))
+		//		}
 
 		json.NewEncoder(w).Encode(o)
 	}).Methods("POST")
@@ -96,6 +90,8 @@ func http_server() {
 }
 
 func add_grpc(a, b int32) (int32, error) {
+	add_grpc_address := fmt.Sprintf("%s:%s", os.Getenv("add_grpc_host"), os.Getenv("add_grpc_port"))
+
 	// Set up a connection to the server.
 	conn, err := grpc.Dial(add_grpc_address, grpc.WithInsecure())
 	if err != nil {
@@ -116,6 +112,7 @@ func add_grpc(a, b int32) (int32, error) {
 }
 
 func divide_grpc(a, b int32) (int32, error) {
+	divide_grpc_address := fmt.Sprintf("%s:%s", os.Getenv("divide_grpc_host"), os.Getenv("divide_grpc_port"))
 	// Set up a connection to the server.
 	conn, err := grpc.Dial(divide_grpc_address, grpc.WithInsecure())
 	if err != nil {
@@ -140,10 +137,13 @@ type ProductResponse struct {
 }
 
 func multiply_http(a, b int32) (int32, error) {
+	multiply_http_address := fmt.Sprintf("http://%s:%s/multiply", os.Getenv("MULTIPLY_SVC_SERVICE_HOST"), os.Getenv("MULTIPLY_SVC_SERVICE_PORT"))
 	url := multiply_http_address
-
+	fmt.Println(url)
 	var jsonStr = []byte(fmt.Sprintf("{\"a\": %v, \"b\": %v}", a, b))
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
+	fmt.Printf("Req: %v\n", req)
+	fmt.Printf("Req Header: %v\n", req.Header)
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
@@ -165,9 +165,11 @@ type SubtractResponse struct {
 }
 
 func subtract_http(a, b int32) (int32, error) {
+	subtract_http_address := fmt.Sprintf("%s:%s", os.Getenv("subtract_http_host"), os.Getenv("subtract_http_port"))
 	url := subtract_http_address
 
 	var jsonStr = []byte(fmt.Sprintf("{'a': %v, 'b': %v}", a, b))
+
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
 	req.Header.Set("Content-Type", "application/json")
 
