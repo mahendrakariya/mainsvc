@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+   name: mainsvc-pod
+spec:
+   containers:
+   - name: mainsvc-cont
+     image: mahendrakariya/mainsvc:0.0.8
+     ports:
+     - containerPort: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+   name: mainsvc-svc
+spec:
+   ports:
+     - protocol: TCP
+       port: 80
+       targetPort: 8000
