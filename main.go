@@ -47,12 +47,12 @@ func http_server() {
 
 		o := &Output{}
 
-		// sum, err := add_grpc(n.A, n.B)
-		// if err != nil {
-		// 	o.Sum = err.Error()
-		// } else {
-		// 	o.Sum = strconv.Itoa(int(sum))
-		// }
+		sum, err := add_grpc(n.A, n.B)
+		if err != nil {
+			o.Sum = err.Error()
+		} else {
+			o.Sum = strconv.Itoa(int(sum))
+		}
 
 		//		diff, err := subtract_http(n.A, n.B)
 		//		if err != nil {
@@ -67,13 +67,13 @@ func http_server() {
 		} else {
 			o.Product = strconv.Itoa(int(product))
 		}
-		//
-		//		quotient, err := divide_grpc(n.A, n.B)
-		//		if err != nil {
-		//			o.Quotient = err.Error()
-		//		} else {
-		//			o.Quotient = strconv.Itoa(int(quotient))
-		//		}
+
+		quotient, err := divide_grpc(n.A, n.B)
+		if err != nil {
+			o.Quotient = err.Error()
+		} else {
+			o.Quotient = strconv.Itoa(int(quotient))
+		}
 
 		json.NewEncoder(w).Encode(o)
 	}).Methods("POST")
@@ -90,7 +90,7 @@ func http_server() {
 }
 
 func add_grpc(a, b int32) (int32, error) {
-	add_grpc_address := fmt.Sprintf("%s:%s", os.Getenv("add_grpc_host"), os.Getenv("add_grpc_port"))
+	add_grpc_address := "add-svc:50051"
 
 	// Set up a connection to the server.
 	conn, err := grpc.Dial(add_grpc_address, grpc.WithInsecure())
@@ -112,7 +112,7 @@ func add_grpc(a, b int32) (int32, error) {
 }
 
 func divide_grpc(a, b int32) (int32, error) {
-	divide_grpc_address := fmt.Sprintf("%s:%s", os.Getenv("divide_grpc_host"), os.Getenv("divide_grpc_port"))
+	divide_grpc_address := "divide-svc:50052"
 	// Set up a connection to the server.
 	conn, err := grpc.Dial(divide_grpc_address, grpc.WithInsecure())
 	if err != nil {
@@ -137,7 +137,7 @@ type ProductResponse struct {
 }
 
 func multiply_http(a, b int32) (int32, error) {
-	multiply_http_address := fmt.Sprintf("http://%s:%s/multiply", os.Getenv("MULTIPLY_SVC_SERVICE_HOST"), os.Getenv("MULTIPLY_SVC_SERVICE_PORT"))
+	multiply_http_address := fmt.Sprintf("http://%s:8001/multiply", "multiply-svc.default.svc.cluster.local")
 	url := multiply_http_address
 	fmt.Println(url)
 	var jsonStr = []byte(fmt.Sprintf("{\"a\": %v, \"b\": %v}", a, b))
