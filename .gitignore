@@ -1,2 +1,3 @@
 vendor/*
 mainsvc
+gke-curl.sh
