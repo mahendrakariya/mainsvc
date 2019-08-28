@@ -1,6 +1,6 @@
-USERNAME=himani93
+USERNAME=mahendrakariya
 IMAGE=mainsvc
-VERSION=0.0.16
+VERSION=0.0.9
 
 build:
 	go build -o mainsvc

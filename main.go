@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 
@@ -54,13 +53,13 @@ func http_server() {
 			o.Sum = strconv.Itoa(int(sum))
 		}
 
-		//		diff, err := subtract_http(n.A, n.B)
-		//		if err != nil {
-		//			o.Diff = err.Error()
-		//		} else {
-		//			o.Diff = strconv.Itoa(int(diff))
-		//		}
-		//
+		diff, err := subtract_http(n.A, n.B)
+		if err != nil {
+			o.Diff = err.Error()
+		} else {
+			o.Diff = strconv.Itoa(int(diff))
+		}
+
 		product, err := multiply_http(n.A, n.B)
 		if err != nil {
 			o.Product = err.Error()
@@ -165,12 +164,11 @@ type SubtractResponse struct {
 }
 
 func subtract_http(a, b int32) (int32, error) {
-	subtract_http_address := fmt.Sprintf("%s:%s", os.Getenv("subtract_http_host"), os.Getenv("subtract_http_port"))
-	url := subtract_http_address
+	multiply_http_address := fmt.Sprintf("http://%s:4567/subtract", "subtract-svc.default.svc.cluster.local")
 
 	var jsonStr = []byte(fmt.Sprintf("{'a': %v, 'b': %v}", a, b))
 
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
+	req, err := http.NewRequest("POST", multiply_http_address, bytes.NewBuffer(jsonStr))
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}

@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: main-cont
-        image: himani93/mainsvc:0.0.16
+        image: mahendrakariya/mainsvc:0.0.9
         ports:
         - containerPort: 8000
 ---
